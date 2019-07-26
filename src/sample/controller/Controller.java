@@ -13,6 +13,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import sample.data.ScoreData;
 import sample.ExcelController.ScoreExcelReader;
+import sample.dialog.Dialog;
 
 import java.io.File;
 import java.net.URL;
@@ -20,14 +21,16 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable{
-    private Stage primaryStage;
-    private String selectedFilePath;
     private static List<ScoreData> xlsxList;
     private static List<ScoreData> xlsList;
 
     @FXML private Button loadButton;
     @FXML private Label resultLabel;
     @FXML private Button resultButton;
+
+    private static String ext;
+    private static String selectedFilePath;
+    private static ScoreExcelReader excelReader = new ScoreExcelReader();
 
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
@@ -43,12 +46,10 @@ public class Controller implements Initializable{
             else
                 resultLabel.setText("파일명: " + selectedFIle.getName());
             selectedFilePath = selectedFIle.getPath();
-            ScoreExcelReader excelReader = new ScoreExcelReader();
-
+            excelReader = new ScoreExcelReader();
             /*추출된 파일명을 통해 xls or xlsx에 초기화*/
             int pos = selectedFIle.getName().lastIndexOf(".");
-            String ext = selectedFIle.getName().substring(pos +1);
-
+            ext = selectedFIle.getName().substring(pos +1);
             if(ext.equals("xls")){
                 xlsList = excelReader.xlsToCustomerVoList(selectedFilePath);
             }
@@ -65,28 +66,15 @@ public class Controller implements Initializable{
                 Stage primaryStage = (Stage) resultButton.getScene().getWindow();
                 primaryStage.setScene(scene);
             }catch (Exception e){
-                getAlertDialog();
+                Dialog.getDialog(e);
             }
         });
     }
-
-    public void setPrimaryStage(Stage primaryStage){
-        this.primaryStage=primaryStage;
-    }
-
-    public String getSelectedFilePath(){
-        return selectedFilePath;
-    }
-
+//xls와 xlsx인 경우 나눠서 get
     public static List<ScoreData>  getData(){
-        return xlsxList;
-    }
-
-    private void getAlertDialog(){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("알림");
-        alert.setHeaderText(null);
-        alert.setContentText("Excel 파일을 로드하세요.");
-        alert.showAndWait();
+        if(ext.equals("xls"))
+            return  xlsList;
+        else
+            return xlsxList;
     }
 }

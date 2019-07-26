@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import org.apache.poi.ss.formula.functions.Index;
 import sample.ExcelController.ScoreExcelWriter;
 import sample.data.ScoreData;
+import sample.dialog.Dialog;
 
 import java.net.URL;
 import java.util.*;
@@ -72,8 +73,9 @@ public class ScoreSceneContoller implements Initializable {
     private ObservableList<ScoreData> newList = FXCollections.observableArrayList();
     private ObservableList<ScoreData> primaryTableList = FXCollections.observableArrayList(); //for % getUp,DownValue Method
     private int percent;
+    private int mode; //up인지 down인지 구분해서 rank 얻기 위한 변수
 
-    //빈 값 버튼 클릭시 dialog 띄우기
+    //0점 나오는 과목 write 오류/ 메인 버튼 클릭시 메인화면으로 안가고 종료됨
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         dataInit();
@@ -102,7 +104,7 @@ public class ScoreSceneContoller implements Initializable {
             //tableView item이 없을 때 경고창으로 예외처리
             try {
                 excelWriter.xlsxWiter(getTableItem());
-            }catch (IndexOutOfBoundsException e){getAlertDialog(e);}
+            }catch (IndexOutOfBoundsException e){Dialog.getDialog(e);}
         });
         /*메인화면 getScene*/
         mainButton.setOnMouseClicked(event ->{
@@ -117,23 +119,26 @@ public class ScoreSceneContoller implements Initializable {
         /*percent값 받기*/
         getUpButton.setOnMouseClicked(event ->{
             try{
+                mode=0;
                 percent = Integer.parseInt(upPercentText.getText());
                 if(percent>100 || percent<0)
-                    getAlertDialog(ERROR_FOR_ALERTDIALOG);
+                    Dialog.getDialog(ERROR_FOR_ALERTDIALOG);
                 getUpValue(percent, primaryTableList);
                 upPercentText.setText("");
             }catch (NumberFormatException e) //값이 ""이거나 문자열일 경우 예외처리
-            {getAlertDialog(e);}
+            {
+                Dialog.getDialog(e);}
         });
         getDownButton.setOnMouseClicked(event ->{
             try{
+                mode=1;
                 percent = Integer.parseInt(downPercentText.getText());
                 if(percent>100 || percent<0)
-                    getAlertDialog(ERROR_FOR_ALERTDIALOG);
+                    Dialog.getDialog(ERROR_FOR_ALERTDIALOG);
                 getDownValue(percent, primaryTableList);
                 downPercentText.setText("");
             }catch (NumberFormatException e) //값이 ""이거나 문자열일 경우 예외처리
-            {getAlertDialog(e);}
+            {Dialog.getDialog(e);}
         });
     }
 
@@ -357,9 +362,10 @@ public class ScoreSceneContoller implements Initializable {
     //TABLE VALUE GETTER
     private ObservableList<ScoreData> getTableItem() {
         ScoreData getData = new ScoreData();
-        List<List<String>> arrList = new ArrayList<>();
         ObservableList<ScoreData> obList = FXCollections.observableArrayList();
         int[] rank = getRank();
+        for(int i=0; i<rank.length; i++)
+            System.out.print(rank[i]+" ");
 
         for (int i = 0; i < tableView.getItems().size(); i++) {
             getData = tableView.getItems().get(i);
@@ -367,22 +373,56 @@ public class ScoreSceneContoller implements Initializable {
             obList.get(i).setClass_num(getData.getClass_num());
             obList.get(i).setId(getData.getId());
             obList.get(i).setName(getData.getName());
-            if (tableKor != null)
+            if (tableKor != null) {
                 obList.get(i).setKor(getData.getKor());
-            if (tableEng != null)
+                obList.get(i).setKorHeader(true);
+            }
+            else
+                obList.get(i).setKorHeader(false);
+            if (tableEng != null) {
                 obList.get(i).setEng(getData.getEng());
-            if (tableMath != null)
+                obList.get(i).setEngHeader(true);
+            }
+            else
+                obList.get(i).setEngHeader(false);
+            if (tableMath != null) {
                 obList.get(i).setMath(getData.getMath());
-            if (tableSoc != null)
+                obList.get(i).setMathHeader(true);
+            }
+            else
+                obList.get(i).setMathHeader(false);
+            if (tableSoc != null) {
                 obList.get(i).setSoc(getData.getSoc());
-            if (tableSci != null)
+                obList.get(i).setSocHeader(true);
+            }
+            else
+                obList.get(i).setSocHeader(false);
+            if (tableSci != null) {
                 obList.get(i).setSci(getData.getSci());
-            if (tableMus != null)
+                obList.get(i).setSciHeader(true);
+            }
+            else
+                obList.get(i).setSciHeader(false);
+            if (tableMus != null) {
                 obList.get(i).setMus(getData.getMus());
-            if (tableArt != null)
+                obList.get(i).setMusHeader(true);
+            }
+            else {
+                obList.get(i).setMusHeader(false);
+               // System.out.println(obList.get(i).isMusHeader());
+            }
+            if (tableArt != null) {
                 obList.get(i).setArt(getData.getArt());
-            if (tableSpo != null)
+                obList.get(i).setArtHeader(true);
+            }
+            else
+                obList.get(i).setArtHeader(false);
+            if (tableSpo != null) {
                 obList.get(i).setSpo(getData.getSpo());
+                obList.get(i).setSpoHeader(true);
+            }
+            else
+                obList.get(i).setSpoHeader(false);
             obList.get(i).setAvg(getData.getAvg());
             obList.get(i).setRank(rank[i]);
         }
@@ -397,56 +437,102 @@ public class ScoreSceneContoller implements Initializable {
         float nextSum=0;
         int[] rank = new int[tableView.getItems().size()];
 
-        for (int i = 0; i < tableView.getItems().size(); i++) {
-            rank[i] = 1;
-            for (int j = 0; j < tableView.getItems().size(); j++) {
-                prevData = tableView.getItems().get(i);
-                nextData = tableView.getItems().get(j);
-                if(tableKor!=null) {
-                    prevSum += prevData.getKor();
-                    nextSum += nextData.getKor();
-                }
-                if(tableEng!=null) {
-                    prevSum += prevData.getEng();
-                    nextSum += nextData.getEng();
+        if(mode==0) {
+            for (int i = 0; i < tableView.getItems().size(); i++) {
+                rank[i] = 1;
+                for (int j = 0; j < tableView.getItems().size(); j++) {
+                    prevData = tableView.getItems().get(i);
+                    nextData = tableView.getItems().get(j);
+                    if (tableKor != null) {
+                        prevSum += prevData.getKor();
+                        nextSum += nextData.getKor();
+                    }
+                    if (tableEng != null) {
+                        prevSum += prevData.getEng();
+                        nextSum += nextData.getEng();
 
+                    }
+                    if (tableMath != null) {
+                        prevSum += prevData.getMath();
+                        nextSum += nextData.getMath();
+                    }
+                    if (tableSoc != null) {
+                        prevSum += prevData.getSoc();
+                        nextSum += nextData.getSoc();
+                    }
+                    if (tableSci != null) {
+                        prevSum += prevData.getSci();
+                        nextSum += nextData.getSci();
+                    }
+                    if (tableMus != null) {
+                        prevSum += prevData.getMus();
+                        nextSum += nextData.getMus();
+                    }
+                    if (tableArt != null) {
+                        prevSum += prevData.getArt();
+                        nextSum += nextData.getArt();
+                    }
+                    if (tableSpo != null) {
+                        prevSum += prevData.getSpo();
+                        nextSum += nextData.getSpo();
+                    }
+                    if (prevSum < nextSum)
+                        rank[i]++;
+                    nextSum = 0;
+                    prevSum = 0;
                 }
-                if(tableMath!=null) {
-                    prevSum += prevData.getMath();
-                    nextSum += nextData.getMath();
-                }
-                if(tableSoc!=null) {
-                    prevSum += prevData.getSoc();
-                    nextSum += nextData.getSoc();
-                }
-                if(tableSci!=null) {
-                    prevSum += prevData.getSci();
-                    nextSum += nextData.getSci();
-                }
-                if(tableMus!=null) {
-                    prevSum += prevData.getMus();
-                    nextSum += nextData.getMus();
-                }
-                if(tableArt!=null) {
-                    prevSum += prevData.getArt();
-                    nextSum += nextData.getArt();
-                }
-                if(tableSpo!=null) {
-                    prevSum += prevData.getSpo();
-                    nextSum += nextData.getSpo();
-                }
+            }
+        }
+        else if(mode==1) {
+            for (int i = 0; i < tableView.getItems().size(); i++) {
+                rank[i] = Integer.parseInt(student_number.getText());
+                for (int j = 0; j < tableView.getItems().size(); j++) {
+                    prevData = tableView.getItems().get(i);
+                    nextData = tableView.getItems().get(j);
+                    if (tableKor != null) {
+                        prevSum += prevData.getKor();
+                        nextSum += nextData.getKor();
+                    }
+                    if (tableEng != null) {
+                        prevSum += prevData.getEng();
+                        nextSum += nextData.getEng();
 
-                if (prevSum < nextSum) {
-                    rank[i]++;
+                    }
+                    if (tableMath != null) {
+                        prevSum += prevData.getMath();
+                        nextSum += nextData.getMath();
+                    }
+                    if (tableSoc != null) {
+                        prevSum += prevData.getSoc();
+                        nextSum += nextData.getSoc();
+                    }
+                    if (tableSci != null) {
+                        prevSum += prevData.getSci();
+                        nextSum += nextData.getSci();
+                    }
+                    if (tableMus != null) {
+                        prevSum += prevData.getMus();
+                        nextSum += nextData.getMus();
+                    }
+                    if (tableArt != null) {
+                        prevSum += prevData.getArt();
+                        nextSum += nextData.getArt();
+                    }
+                    if (tableSpo != null) {
+                        prevSum += prevData.getSpo();
+                        nextSum += nextData.getSpo();
+                    }
+                    if (prevSum > nextSum)
+                        rank[i]--;
+                    nextSum = 0;
+                    prevSum = 0;
                 }
-                nextSum=0;
-                prevSum=0;
             }
         }
         return rank;
     }
 
-    private float[] getAvg(){
+    public float[] getAvg(){
         float[] avg=new float[tableView.getItems().size()];
         ScoreData prevData = new ScoreData();
         float prevSum=0;
@@ -508,17 +594,6 @@ public class ScoreSceneContoller implements Initializable {
         for(int i=list.size(); i>list.size()-student_num; i--)
             resultList.add(list.get(i-1));
         tableView.setItems(resultList);
-    }
-
-    private void getAlertDialog(Exception e){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("알림");
-        alert.setHeaderText(null);
-        if(e instanceof IndexOutOfBoundsException) //instance of : 예외처리 비교
-            alert.setContentText("표시된 정보가 없습니다.\n표시할 과목을 선택해주세요.");
-        else if(e instanceof  NumberFormatException) //instance of : 예외처리 비교
-            alert.setContentText("빈 값 혹은 0~100을 벗어난 값을 입력했습니다.\n표시할 과목을 선택해주세요.");
-        alert.showAndWait();
     }
 
 }

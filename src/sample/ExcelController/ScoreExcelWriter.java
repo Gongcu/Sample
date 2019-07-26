@@ -40,42 +40,42 @@ public class ScoreExcelWriter {
 
         int column_index = 3;
 
-        if (list.get(0).getKor() != 0) {
+        if (list.get(0).isKorHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("국어");
             column_index++;
         }
-        if (list.get(0).getEng() != 0) {
+        if (list.get(0).isEngHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("영어");
             column_index++;
         }
-        if (list.get(0).getMath() != 0) {
+        if (list.get(0).isMathHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("수학");
             column_index++;
         }
-        if (list.get(0).getSoc() != 0) {
+        if (list.get(0).isSocHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("사회");
             column_index++;
         }
-        if (list.get(0).getSci() != 0) {
+        if (list.get(0).isSciHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("과학");
             column_index++;
         }
-        if (list.get(0).getMus() != 0) {
+        if (list.get(0).isMusHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("음악");
             column_index++;
         }
-        if (list.get(0).getArt() != 0) {
+        if (list.get(0).isArtHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("미술");
             column_index++;
         }
-        if (list.get(0).getSpo() != 0) {
+        if (list.get(0).isSpoHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("체육");
             column_index++;
@@ -106,42 +106,42 @@ public class ScoreExcelWriter {
 
             column_index = 3;
 
-            if (list.get(rowIdx).getKor() != 0) { //기존 list.get(rowIdx).korProperty() != null 에서 변경, 값이 있는 경우에 추가
+            if (list.get(rowIdx).isKorHeader() != false) { //기존 list.get(rowIdx).korProperty() != null 에서 변경, 열이 있는 경우에 추가
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getKor());
                 column_index++;
             }
-            if (list.get(rowIdx).getEng() != 0) {
+            if (list.get(rowIdx).isEngHeader() != false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getEng());
                 column_index++;
             }
-            if (list.get(rowIdx).getMath() != 0) {
+            if (list.get(rowIdx).isMathHeader() !=false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getMath());
                 column_index++;
             }
-            if (list.get(rowIdx).getSoc() != 0) {
+            if (list.get(rowIdx).isSocHeader() != false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getSoc());
                 column_index++;
             }
-            if (list.get(rowIdx).getSci() != 0) {
+            if (list.get(rowIdx).isSciHeader() != false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getSci());
                 column_index++;
             }
-            if (list.get(rowIdx).getMus() != 0) {
+            if (list.get(rowIdx).isMusHeader() != false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getMus());
                 column_index++;
             }
-            if (list.get(rowIdx).getArt() != 0) {
+            if (list.get(rowIdx).isArtHeader() != false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getArt());
                 column_index++;
             }
-            if (list.get(rowIdx).getSpo() != 0) {
+            if (list.get(rowIdx).isSpoHeader() != false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getSpo());
                 column_index++;
@@ -195,45 +195,45 @@ public class ScoreExcelWriter {
 
         cell = row.createCell(2);
         cell.setCellValue("이름");
-
+        System.out.println("         "+list.get(0).isKorHeader());
         int column_index = 3;
         //for (int i = 0; i < COLUMN_NUMBER; i++) {
-        if (list.get(0).getKor() != 0) {
+        if (list.get(0).isKorHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("국어");
             column_index++;
         }
-        if (list.get(0).getEng() != 0) {
+        if (list.get(0).isEngHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("영어");
             column_index++;
         }
-        if (list.get(0).getMath() != 0) {
+        if (list.get(0).isMathHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("수학");
             column_index++;
         }
-        if (list.get(0).getSoc() != 0) {
+        if (list.get(0).isSocHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("사회");
             column_index++;
         }
-        if (list.get(0).getSci() != 0) {
+        if (list.get(0).isSciHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("과학");
             column_index++;
         }
-        if (list.get(0).getMus() != 0) {
+        if (list.get(0).isMusHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("음악");
             column_index++;
         }
-        if (list.get(0).getArt() != 0) {
+        if (list.get(0).isArtHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("미술");
             column_index++;
         }
-        if (list.get(0).getSpo() != 0) {
+        if (list.get(0).isSpoHeader() != false) {
             cell = row.createCell(column_index);
             cell.setCellValue("체육");
             column_index++;
@@ -265,42 +265,42 @@ public class ScoreExcelWriter {
 
             column_index = 3;
 
-            if (list.get(rowIdx).getKor() != 0) { //기존 list.get(rowIdx).korProperty() != null 에서 변경, 값이 있는 경우에 추가
+            if (list.get(rowIdx).isKorHeader() != false) { //기존 list.get(rowIdx).korProperty() != null 에서 변경, 열이 있는 경우에 추가
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getKor());
                 column_index++;
             }
-            if (list.get(rowIdx).getEng() != 0) {
+            if (list.get(rowIdx).isEngHeader() != false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getEng());
                 column_index++;
             }
-            if (list.get(rowIdx).getMath() != 0) {
+            if (list.get(rowIdx).isMathHeader() !=false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getMath());
                 column_index++;
             }
-            if (list.get(rowIdx).getSoc() != 0) {
+            if (list.get(rowIdx).isSocHeader() != false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getSoc());
                 column_index++;
             }
-            if (list.get(rowIdx).getSci() != 0) {
+            if (list.get(rowIdx).isSciHeader() != false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getSci());
                 column_index++;
             }
-            if (list.get(rowIdx).getMus() != 0) {
+            if (list.get(rowIdx).isMusHeader() != false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getMus());
                 column_index++;
             }
-            if (list.get(rowIdx).getArt() != 0) {
+            if (list.get(rowIdx).isArtHeader() != false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getArt());
                 column_index++;
             }
-            if (list.get(rowIdx).getSpo() != 0) {
+            if (list.get(rowIdx).isSpoHeader() != false) {
                 cell = row.createCell(column_index);
                 cell.setCellValue(vo.getSpo());
                 column_index++;
