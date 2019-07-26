@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
     @Override
+    //성적 관리 프로그램
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("fxml/main.fxml"));
         primaryStage.setTitle("성적분석프로그램");
