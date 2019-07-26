@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.collections.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<SplitPane dividerPositions="0.24874371859296482" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="1000.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controller.ScoreSceneContoller">
+  <items>
+    <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="800.0">
+         <children>
+            <SplitPane dividerPositions="0.2986577181208054" maxHeight="-Infinity" prefHeight="100.0" prefWidth="800.0">
+              <items>
+                <AnchorPane maxHeight="-Infinity" minHeight="0.0" minWidth="0.0" prefHeight="98.0" prefWidth="498.0">
+                     <children>
+                        <Label layoutX="24.0" layoutY="14.0" text="상위" />
+                        <Label layoutX="24.0" layoutY="55.0" text="하위" />
+                        <TextField fx:id="upPercentText" layoutX="64.0" layoutY="9.0" prefHeight="29.0" prefWidth="39.0" />
+                        <TextField fx:id="downPercentText" layoutX="64.0" layoutY="50.0" prefHeight="29.0" prefWidth="39.0" />
+                        <Label layoutX="112.0" layoutY="14.0" text="\%" />
+                        <Label layoutX="112.0" layoutY="55.0" text="\%" />
+                        <Button fx:id="getUpButton" layoutX="131.0" layoutY="9.0" mnemonicParsing="false" text="추출" />
+                         <Button fx:id="getDownButton" layoutX="131.0" layoutY="50.0" mnemonicParsing="false" text="추출" />
+                        <ComboBox fx:id="comboBox" layoutX="221.0" layoutY="9.0" prefWidth="150.0" promptText="과목 우수자">
+                            <items><FXCollections fx:factory="observableArrayList">
+                                <String fx:value="전과목" />
+                                <String fx:value="국영수사과" />
+                                <String fx:value="국영수" />
+                                <String fx:value="수학과학" />
+                                <String fx:value="영어" />
+                           </FXCollections></items>
+                        </ComboBox>
+                        <Label layoutX="221.0" layoutY="55.0" text="전교생 수:" />
+                        <Label fx:id="student_number" layoutX="286.0" layoutY="51.0" text="0" />
+                        <Label layoutX="221.0" layoutY="75.0" text="*과목명을 클릭하면 석차 순으로 정렬됩니다." />
+
+                     </children>
+                  </AnchorPane>
+                <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" prefHeight="98.0" prefWidth="254.0">
+                     <children>
+                        <Button fx:id="saveButton" layoutX="14.0" layoutY="20.0" mnemonicParsing="false" text="엑셀저장" />
+                        <Button fx:id="mainButton" layoutX="160.0" layoutY="20.0" mnemonicParsing="false" text="메인화면" />
+                        <Button fx:id="exitButton" layoutX="70.0" layoutY="55.0" mnemonicParsing="false" text="프로그램 종료" />
+                     </children>
+                  </AnchorPane>
+              </items>
+            </SplitPane>
+         </children></AnchorPane>
+    <StackPane maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" prefHeight="900.0" prefWidth="800.0">
+         <children>
+            <TableView fx:id="tableView" prefHeight="900.0" prefWidth="800.0">
+              <columns>
+
+              </columns>
+            </TableView>
+         </children></StackPane>
+  </items>
+</SplitPane>
