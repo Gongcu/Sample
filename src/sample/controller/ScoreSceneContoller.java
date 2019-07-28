@@ -6,14 +6,19 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.apache.poi.ss.formula.functions.Index;
 import sample.ExcelController.ScoreExcelWriter;
+import sample.data.PrimaryData;
 import sample.data.ScoreData;
 import sample.dialog.Dialog;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
@@ -75,7 +80,6 @@ public class ScoreSceneContoller implements Initializable {
     private int percent;
     private int mode; //up인지 down인지 구분해서 rank 얻기 위한 변수
 
-    //0점 나오는 과목 write 오류/ 메인 버튼 클릭시 메인화면으로 안가고 종료됨
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         dataInit();
@@ -108,9 +112,15 @@ public class ScoreSceneContoller implements Initializable {
         });
         /*메인화면 getScene*/
         mainButton.setOnMouseClicked(event ->{
-            Stage stage = (Stage) exitButton.getScene().getWindow();
-            // do what you have to do
-            stage.close();
+            try {
+                Parent root = FXMLLoader.load(getClass().getResource("../fxml/main.fxml"));
+                PrimaryData.setSelectedFileName("파일이 이미 로딩 되어 있습니다.");
+                Scene scene = new Scene(root);
+                Stage stage = (Stage) exitButton.getScene().getWindow();
+                stage.setScene(scene);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
         });
         /*종료*/
         exitButton.setOnMouseClicked(event ->{
@@ -118,27 +128,11 @@ public class ScoreSceneContoller implements Initializable {
         });
         /*percent값 받기*/
         getUpButton.setOnMouseClicked(event ->{
-            try{
-                mode=0;
-                percent = Integer.parseInt(upPercentText.getText());
-                if(percent>100 || percent<0)
-                    Dialog.getDialog(ERROR_FOR_ALERTDIALOG);
-                getUpValue(percent, primaryTableList);
-                upPercentText.setText("");
-            }catch (NumberFormatException e) //값이 ""이거나 문자열일 경우 예외처리
-            {
-                Dialog.getDialog(e);}
+            getPercentValue(0,percent, primaryTableList);
+
         });
         getDownButton.setOnMouseClicked(event ->{
-            try{
-                mode=1;
-                percent = Integer.parseInt(downPercentText.getText());
-                if(percent>100 || percent<0)
-                    Dialog.getDialog(ERROR_FOR_ALERTDIALOG);
-                getDownValue(percent, primaryTableList);
-                downPercentText.setText("");
-            }catch (NumberFormatException e) //값이 ""이거나 문자열일 경우 예외처리
-            {Dialog.getDialog(e);}
+            getPercentValue(1,percent, primaryTableList);
         });
     }
 
@@ -158,33 +152,11 @@ public class ScoreSceneContoller implements Initializable {
         tableAvg = new TableColumn("평균");
         tableRank = new TableColumn("석차");
 
-        //set the table column
-        tableName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        tableClass.setCellValueFactory(cellData -> cellData.getValue().class_numProperty().asObject());
-        tableId.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
-        tableKor.setCellValueFactory(cellData -> cellData.getValue().korProperty().asObject());
-        tableEng.setCellValueFactory(cellData -> cellData.getValue().engProperty().asObject());
-        tableMath.setCellValueFactory(cellData -> cellData.getValue().mathProperty().asObject());
-        tableSoc.setCellValueFactory(cellData -> cellData.getValue().socProperty().asObject());
-        tableSci.setCellValueFactory(cellData -> cellData.getValue().sciProperty().asObject());
-        tableMus.setCellValueFactory(cellData -> cellData.getValue().musProperty().asObject());
-        tableArt.setCellValueFactory(cellData -> cellData.getValue().artProperty().asObject());
-        tableSpo.setCellValueFactory(cellData -> cellData.getValue().spoProperty().asObject());
-        tableAvg.setCellValueFactory(cellData -> cellData.getValue().avgProperty().asObject());
-        tableRank.setCellValueFactory(cellData -> cellData.getValue().rankProperty().asObject());
+        initColumnDataByItem();
 
-        //tableView.getItems().clear();
         tableView.getColumns().addAll(tableClass, tableId, tableName, tableKor, tableEng, tableMath, tableSoc, tableSci, tableMus, tableArt, tableSpo, tableAvg, tableRank);
 
-        tableView.setItems(newList); // finally add data to tableview
-        int[] rank = getRank();
-        float[] avg = getAvg();
-        for(int i=0; i<newList.size(); i++){
-            newList.get(i).setRank(rank[i]);
-            newList.get(i).setAvg(avg[i]);
-        }
-        primaryTableList=newList;
-        tableView.setItems(newList); // finally add data to tableview
+        tableViewSetter();
     }
 
     private void Insert_main() {
@@ -203,31 +175,11 @@ public class ScoreSceneContoller implements Initializable {
         tableAvg = new TableColumn("평균");
         tableRank = new TableColumn("석차");
 
+        initColumnDataByItem();
 
-        //set the table column
-        tableName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        tableClass.setCellValueFactory(cellData -> cellData.getValue().class_numProperty().asObject());
-        tableId.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
-        tableKor.setCellValueFactory(cellData -> cellData.getValue().korProperty().asObject());
-        tableEng.setCellValueFactory(cellData -> cellData.getValue().engProperty().asObject());
-        tableMath.setCellValueFactory(cellData -> cellData.getValue().mathProperty().asObject());
-        tableSoc.setCellValueFactory(cellData -> cellData.getValue().socProperty().asObject());
-        tableSci.setCellValueFactory(cellData -> cellData.getValue().sciProperty().asObject());
-        tableAvg.setCellValueFactory(cellData -> cellData.getValue().avgProperty().asObject());
-        tableRank.setCellValueFactory(cellData -> cellData.getValue().rankProperty().asObject());
-
-        //tableView.getItems().clear();
         tableView.getColumns().addAll(tableClass, tableId, tableName, tableKor, tableEng, tableMath, tableSoc, tableSci,tableAvg,tableRank);
-        /*tableView를 세팅하고 세팅된 값을 받아서 rank를 설정한 뒤 다시 tableView 세팅*/
-        tableView.setItems(newList); // finally add data to tableview
-        int[] rank = getRank();
-        float[] avg = getAvg();
-        for(int i=0; i<newList.size(); i++){
-            newList.get(i).setRank(rank[i]);
-            newList.get(i).setAvg(avg[i]);
-        }
-        primaryTableList=newList;
-        tableView.setItems(newList); // finally add data to tableview
+
+        tableViewSetter();
     }
 
     private void Insert_kem() {
@@ -246,28 +198,12 @@ public class ScoreSceneContoller implements Initializable {
         tableAvg = new TableColumn("평균");
         tableRank = new TableColumn("석차");
 
-        //set the table column
-        tableName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        tableClass.setCellValueFactory(cellData -> cellData.getValue().class_numProperty().asObject());
-        tableId.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
-        tableKor.setCellValueFactory(cellData -> cellData.getValue().korProperty().asObject());
-        tableEng.setCellValueFactory(cellData -> cellData.getValue().engProperty().asObject());
-        tableMath.setCellValueFactory(cellData -> cellData.getValue().mathProperty().asObject());
-        tableAvg.setCellValueFactory(cellData -> cellData.getValue().avgProperty().asObject());
-        tableRank.setCellValueFactory(cellData -> cellData.getValue().rankProperty().asObject());
-
+        initColumnDataByItem();
 
         //tableView.getItems().clear();
         tableView.getColumns().addAll(tableClass, tableId, tableName, tableKor, tableEng, tableMath,tableAvg,tableRank);
-        tableView.setItems(newList); // finally add data to tableview
-        int[] rank = getRank();
-        float[] avg = getAvg();
-        for(int i=0; i<newList.size(); i++){
-            newList.get(i).setRank(rank[i]);
-            newList.get(i).setAvg(avg[i]);
-        }
-        primaryTableList=newList;
-        tableView.setItems(newList); // finally add data to tableview
+
+        tableViewSetter();
     }
 
     private void Insert_ms() {
@@ -286,12 +222,7 @@ public class ScoreSceneContoller implements Initializable {
         tableAvg = new TableColumn("평균");
         tableRank = new TableColumn("석차");
 
-        //set the table column
-        tableName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        tableClass.setCellValueFactory(cellData -> cellData.getValue().class_numProperty().asObject());
-        tableId.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
-        tableMath.setCellValueFactory(cellData -> cellData.getValue().mathProperty().asObject());
-        tableSci.setCellValueFactory(cellData -> cellData.getValue().sciProperty().asObject());
+        initColumnDataByItem();
 
         tableAvg.setCellValueFactory(cellData -> cellData.getValue().avgProperty().asObject());
         tableRank.setCellValueFactory(cellData -> cellData.getValue().rankProperty().asObject());
@@ -299,15 +230,7 @@ public class ScoreSceneContoller implements Initializable {
         //tableView.getItems().clear();
         tableView.getColumns().addAll(tableClass, tableId, tableName, tableMath, tableSci,tableAvg,tableRank);
 
-        tableView.setItems(newList); // finally add data to tableview
-        int[] rank = getRank();
-        float[] avg = getAvg();
-        for(int i=0; i<newList.size(); i++){
-            newList.get(i).setRank(rank[i]);
-            newList.get(i).setAvg(avg[i]);
-        }
-        primaryTableList=newList;
-        tableView.setItems(newList); // finally add data to tableview
+        tableViewSetter();
     }
 
     private void Insert_eng() {
@@ -326,30 +249,16 @@ public class ScoreSceneContoller implements Initializable {
         tableAvg = new TableColumn("평균");
         tableRank = new TableColumn("석차");
 
-        tableName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        tableClass.setCellValueFactory(cellData -> cellData.getValue().class_numProperty().asObject());
-        tableId.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
-        tableEng.setCellValueFactory(cellData -> cellData.getValue().engProperty().asObject());
-        tableAvg.setCellValueFactory(cellData -> cellData.getValue().avgProperty().asObject());
-        tableRank.setCellValueFactory(cellData -> cellData.getValue().rankProperty().asObject());
+        initColumnDataByItem();
 
-        //tableView.getItems().clear();
         tableView.getColumns().addAll(tableClass, tableId, tableName, tableEng,tableAvg,tableRank);
 
-        tableView.setItems(newList); // finally add data to tableview
-        int[] rank = getRank();
-        float[] avg = getAvg();
-        for(int i=0; i<newList.size(); i++){
-            newList.get(i).setRank(rank[i]);
-            newList.get(i).setAvg(avg[i]);
-        }
-        primaryTableList=newList;
-        tableView.setItems(newList); // finally add data to tableview
+        tableViewSetter();
     }
 
 
     private void dataInit() {
-        student_number.setText(data.size()+"");
+        student_number.setText(data.size()+""); //전교생 수 설정
         for (int i = 0; i < data.size(); i++) {
             //myList.add(data.get(i));
             newList.add(new ScoreData(data.get(i).getClass_num(), data.get(i).getId(), data.get(i).getName(), data.get(i).getKor(),
@@ -364,8 +273,6 @@ public class ScoreSceneContoller implements Initializable {
         ScoreData getData = new ScoreData();
         ObservableList<ScoreData> obList = FXCollections.observableArrayList();
         int[] rank = getRank();
-        for(int i=0; i<rank.length; i++)
-            System.out.print(rank[i]+" ");
 
         for (int i = 0; i < tableView.getItems().size(); i++) {
             getData = tableView.getItems().get(i);
@@ -436,7 +343,6 @@ public class ScoreSceneContoller implements Initializable {
         float prevSum=0;
         float nextSum=0;
         int[] rank = new int[tableView.getItems().size()];
-
         if(mode==0) {
             for (int i = 0; i < tableView.getItems().size(); i++) {
                 rank[i] = 1;
@@ -578,23 +484,65 @@ public class ScoreSceneContoller implements Initializable {
         return avg;
     }
 
-    private void getUpValue(int percent, List<ScoreData> list){
-        ObservableList<ScoreData> resultList = FXCollections.observableArrayList();
-        int student_num =(list.size()*percent)/100;
-        Collections.sort(list);
-        for(int i=0; i<student_num; i++)
-            resultList.add(list.get(i));
-        tableView.setItems(resultList);
+    private void getPercentValue(int num, int percent, List<ScoreData> list){
+        //num으로 상위 하위 % 구분, try문 안에 코드 다 넣어야된다. 밑에 빼면 percent 값이 없는데도 진행
+        try {
+            if(num==0)
+                percent = Integer.parseInt(upPercentText.getText());
+            else
+                percent = Integer.parseInt(downPercentText.getText());
+            if(percent>100 || percent<0)
+                Dialog.getDialog(ERROR_FOR_ALERTDIALOG);
+            ObservableList<ScoreData> resultList = FXCollections.observableArrayList();
+            int student_num =(list.size()*percent)/100;
+            Collections.sort(list);
+            if(num==0) {
+                for (int i = 0; i < student_num; i++)
+                    resultList.add(list.get(i));
+            }
+            else {
+                for(int i=list.size(); i>list.size()-student_num; i--)
+                    resultList.add(list.get(i-1));
+            }
+            tableView.setItems(resultList);
+            upPercentText.setText("");
+            downPercentText.setText("");
+        }catch (NumberFormatException e) {Dialog.getDialog(e);}
     }
 
-    private void getDownValue(int percent, List<ScoreData> list){
-        ObservableList<ScoreData> resultList = FXCollections.observableArrayList();
-        int student_num =(list.size()*percent)/100;
-        Collections.sort(list);
-        for(int i=list.size(); i>list.size()-student_num; i--)
-            resultList.add(list.get(i-1));
-        tableView.setItems(resultList);
+    private void initColumnDataByItem(){
+        tableName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+        tableClass.setCellValueFactory(cellData -> cellData.getValue().class_numProperty().asObject());
+        tableId.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
+        if(tableKor!=null)
+            tableKor.setCellValueFactory(cellData -> cellData.getValue().korProperty().asObject());
+        if(tableEng!=null)
+            tableEng.setCellValueFactory(cellData -> cellData.getValue().engProperty().asObject());
+        if(tableMath!=null)
+            tableMath.setCellValueFactory(cellData -> cellData.getValue().mathProperty().asObject());
+        if(tableSoc!=null)
+            tableSoc.setCellValueFactory(cellData -> cellData.getValue().socProperty().asObject());
+        if(tableSci!=null)
+            tableSci.setCellValueFactory(cellData -> cellData.getValue().sciProperty().asObject());
+        if(tableMus!=null)
+            tableMus.setCellValueFactory(cellData -> cellData.getValue().musProperty().asObject());
+        if(tableArt!=null)
+            tableArt.setCellValueFactory(cellData -> cellData.getValue().artProperty().asObject());
+        if(tableSpo!=null)
+            tableSpo.setCellValueFactory(cellData -> cellData.getValue().spoProperty().asObject());
+        tableAvg.setCellValueFactory(cellData -> cellData.getValue().avgProperty().asObject());
+        tableRank.setCellValueFactory(cellData -> cellData.getValue().rankProperty().asObject());
     }
-
+    private void tableViewSetter(){
+        tableView.setItems(newList); // finally add data to tableview
+        int[] rank = getRank();
+        float[] avg = getAvg();
+        for(int i=0; i<newList.size(); i++){
+            newList.get(i).setRank(rank[i]);
+            newList.get(i).setAvg(avg[i]);
+        }
+        primaryTableList=newList;
+        tableView.setItems(newList); // finally add data to tableview
+    }
 }
 

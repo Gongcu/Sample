@@ -195,7 +195,7 @@ public class ScoreExcelWriter {
 
         cell = row.createCell(2);
         cell.setCellValue("이름");
-        System.out.println("         "+list.get(0).isKorHeader());
+
         int column_index = 3;
         //for (int i = 0; i < COLUMN_NUMBER; i++) {
         if (list.get(0).isKorHeader() != false) {

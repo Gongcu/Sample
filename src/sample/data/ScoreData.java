@@ -340,6 +340,4 @@ public class ScoreData implements Comparable<ScoreData>{
         }
         return 0;
     }
-
-
 }

@@ -11,11 +11,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import sample.data.PrimaryData;
 import sample.data.ScoreData;
 import sample.ExcelController.ScoreExcelReader;
 import sample.dialog.Dialog;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -32,8 +34,17 @@ public class Controller implements Initializable{
     private static String selectedFilePath;
     private static ScoreExcelReader excelReader = new ScoreExcelReader();
 
+    //private static PrimaryData data;
+
+    private static String selectedFileName;
+
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
+        //score.fxml에서 다시 넘어올 때 파일이 로드 되어 있는지 확인하기 위한 조건문
+        if(selectedFileName==null)
+            resultLabel.setText("                파일명:없음");
+        else
+            resultLabel.setText("파일명:"+selectedFileName);
         loadButton.setOnMouseClicked( event -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().addAll(
@@ -41,15 +52,17 @@ public class Controller implements Initializable{
                     new FileChooser.ExtensionFilter("All file", "*.*")
             );
             File selectedFIle = fileChooser.showOpenDialog(new Stage()); //file 객체 반환
-            if(selectedFIle==null)
+            selectedFileName=selectedFIle.getName();
+
+            if(selectedFileName==null)
                 resultLabel.setText("파일을 불러오세요");
             else
-                resultLabel.setText("파일명: " + selectedFIle.getName());
+                resultLabel.setText("파일명: " + selectedFileName);
             selectedFilePath = selectedFIle.getPath();
             excelReader = new ScoreExcelReader();
             /*추출된 파일명을 통해 xls or xlsx에 초기화*/
             int pos = selectedFIle.getName().lastIndexOf(".");
-            ext = selectedFIle.getName().substring(pos +1);
+            ext = selectedFileName.substring(pos +1);
             if(ext.equals("xls")){
                 xlsList = excelReader.xlsToCustomerVoList(selectedFilePath);
             }
@@ -77,4 +90,5 @@ public class Controller implements Initializable{
         else
             return xlsxList;
     }
+
 }
