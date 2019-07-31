@@ -16,6 +16,7 @@ import org.apache.poi.ss.formula.functions.Index;
 import sample.ExcelController.ScoreExcelWriter;
 import sample.data.PrimaryData;
 import sample.data.ScoreData;
+import sample.data.ScoreDataSub;
 import sample.dialog.Dialog;
 
 import java.io.IOException;
@@ -80,6 +81,7 @@ public class ScoreSceneContoller implements Initializable {
     private int percent;
     private int percent_mode; //up인지 down인지 구분해서 rank 얻기 위한 변수
     private Insert_mode insert_mode; //어느 과목 추출한지 확인 위한 enum 변수
+    private ScoreDataSub[] subData; //table에서 rank와 avg 세팅
 
     enum Insert_mode{ALL, MAIN, KEM, MS, E}
 
@@ -115,7 +117,10 @@ public class ScoreSceneContoller implements Initializable {
         saveButton.setOnMouseClicked(event -> {
             //tableView item이 없을 때 경고창으로 예외처리
             try {
-                excelWriter.xlsxWiter(getTableItem());
+                if(PrimaryData.getExt().equals("xlsx"))
+                    excelWriter.xlsxWiter(getTableItem());
+                else if(PrimaryData.getExt().equals("xls"))
+                    excelWriter.xlsWriter(getTableItem());
             }catch (IndexOutOfBoundsException e){Dialog.getDialog(e);}
         });
 
@@ -281,7 +286,6 @@ public class ScoreSceneContoller implements Initializable {
     private ObservableList<ScoreData> getTableItem() {
         ScoreData getData = new ScoreData();
         ObservableList<ScoreData> obList = FXCollections.observableArrayList();
-        int[] rank = getRank();
 
         for (int i = 0; i < tableView.getItems().size(); i++) {
             getData = tableView.getItems().get(i);
@@ -346,27 +350,73 @@ public class ScoreSceneContoller implements Initializable {
                 obList.get(i).setSpoHeader(false);
 
             obList.get(i).setAvg(getData.getAvg());
-            obList.get(i).setRank(rank[i]);
+            obList.get(i).setRank(getData.getRank());
         }
 
         return obList;
     }
 
-    private int[] getRank() {
+    private void getSubData(){
+        //----------for return------
+        subData = new ScoreDataSub[tableView.getItems().size()];
+        //----------for avg---------
+        float sum=0;
+        int subject_num=0;
+        ScoreData tableData = new ScoreData();
+        for (int i = 0; i < tableView.getItems().size(); i++) {
+            tableData = tableView.getItems().get(i);
+            if(tableKor!=null) {
+                sum += tableData.getKor();
+                subject_num++;
+            }
+            if(tableEng!=null) {
+                sum += tableData.getEng();
+                subject_num++;
+            }
+            if(tableMath!=null) {
+                sum += tableData.getMath();
+                subject_num++;
+            }
+            if(tableSoc!=null) {
+                sum += tableData.getSoc();
+                subject_num++;
+            }
+            if(tableSci!=null) {
+                sum += tableData.getSci();
+                subject_num++;
+            }
+            if(tableMus!=null) {
+                sum += tableData.getMus();
+                subject_num++;
+            }
+            if(tableArt!=null) {
+                sum += tableData.getArt();
+                subject_num++;
+            }
+            if(tableSpo!=null) {
+                sum += tableData.getSpo();
+                subject_num++;
+            }
+            subData[i] = new ScoreDataSub();
+            subData[i].setAvg(sum/subject_num);
+            sum=0;
+            subject_num=0;
+        }
+        //----------for rank--------
         ScoreData prevData = new ScoreData();
         ScoreData nextData = new ScoreData();
         float prevSum=0;
         float nextSum=0;
-        int[] rank = new int[tableView.getItems().size()];
         if(percent_mode==0) {
             for (int i = 0; i < tableView.getItems().size(); i++) {
-                rank[i] = 1;
+                subData[i].setRank(1); //제일 높은 순위인 1등 부터 시작해서 다음 값들과 비교 뒤 작은 만큼 계속 순위 증가하는 알고리즘
                 for (int j = 0; j < tableView.getItems().size(); j++) {
                     prevData = tableView.getItems().get(i);
                     nextData = tableView.getItems().get(j);
                     if (tableKor != null) {
                         prevSum += prevData.getKor();
                         nextSum += nextData.getKor();
+                        subject_num++;
                     }
                     if (tableEng != null) {
                         prevSum += prevData.getEng();
@@ -398,7 +448,7 @@ public class ScoreSceneContoller implements Initializable {
                         nextSum += nextData.getSpo();
                     }
                     if (prevSum < nextSum)
-                        rank[i]++;
+                        subData[i].setRank(subData[i].getRank()+1);
                     nextSum = 0;
                     prevSum = 0;
                 }
@@ -406,7 +456,7 @@ public class ScoreSceneContoller implements Initializable {
         }
         else if(percent_mode==1) {
             for (int i = 0; i < tableView.getItems().size(); i++) {
-                rank[i] = Integer.parseInt(student_number.getText());
+                subData[i].setRank(Integer.parseInt(student_number.getText()));//제일 높은 순위인 학생 수(99)부터 시작해서 현재 값이 클수록 감소하는 알고리즘
                 for (int j = 0; j < tableView.getItems().size(); j++) {
                     prevData = tableView.getItems().get(i);
                     nextData = tableView.getItems().get(j);
@@ -444,59 +494,12 @@ public class ScoreSceneContoller implements Initializable {
                         nextSum += nextData.getSpo();
                     }
                     if (prevSum > nextSum)
-                        rank[i]--;
+                        subData[i].setRank(subData[i].getRank()-1);
                     nextSum = 0;
                     prevSum = 0;
                 }
             }
         }
-        return rank;
-    }
-
-    public float[] getAvg(){
-        float[] avg=new float[tableView.getItems().size()];
-        ScoreData prevData = new ScoreData();
-        float prevSum=0;
-        int subject_num=0;
-        for (int i = 0; i < tableView.getItems().size(); i++) {
-            prevData = tableView.getItems().get(i);
-            if(tableKor!=null) {
-                prevSum += prevData.getKor();
-                subject_num++;
-            }
-            if(tableEng!=null) {
-                prevSum += prevData.getEng();
-                subject_num++;
-            }
-            if(tableMath!=null) {
-                prevSum += prevData.getMath();
-                subject_num++;
-            }
-            if(tableSoc!=null) {
-                prevSum += prevData.getSoc();
-                subject_num++;
-            }
-            if(tableSci!=null) {
-                prevSum += prevData.getSci();
-                subject_num++;
-            }
-            if(tableMus!=null) {
-                prevSum += prevData.getMus();
-                subject_num++;
-            }
-            if(tableArt!=null) {
-                prevSum += prevData.getArt();
-                subject_num++;
-            }
-            if(tableSpo!=null) {
-                prevSum += prevData.getSpo();
-                subject_num++;
-            }
-            avg[i]=prevSum/subject_num;
-            prevSum=0;
-            subject_num=0;
-        }
-        return avg;
     }
 
     private void getPercentValue(int num, int percent, List<ScoreData> list){
@@ -550,12 +553,13 @@ public class ScoreSceneContoller implements Initializable {
     }
 
     private void tableViewSetter(){
-        tableView.setItems(newList); // finally add data to tableview
-        int[] rank = getRank();
-        float[] avg = getAvg();
+        tableView.setItems(newList); // 밑에 getRank,getAvg 메서드를 진행하려면 setting된 테이블이 필요함
+        //int[] rank = getRank();
+        //float[] avg = getAvg();
+        getSubData();
         for(int i=0; i<newList.size(); i++){
-            newList.get(i).setRank(rank[i]);
-            newList.get(i).setAvg(avg[i]);
+            newList.get(i).setRank(subData[i].getRank());
+            newList.get(i).setAvg(subData[i].getAvg());
         }
         primaryTableList=newList;
         tableView.setItems(newList); // finally add data to tableview

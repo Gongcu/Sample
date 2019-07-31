@@ -34,7 +34,7 @@ public class Controller implements Initializable{
     private static String selectedFilePath;
     private static ScoreExcelReader excelReader = new ScoreExcelReader();
 
-    //private static PrimaryData data;
+    private static PrimaryData data; //ScoreSceneController로 확장자를 전달하여 xlsWrite, xlsxWriter 중 무엇을 쓸지 비교
 
     private static String selectedFileName;
 
@@ -53,7 +53,7 @@ public class Controller implements Initializable{
             );
             File selectedFIle = fileChooser.showOpenDialog(new Stage()); //file 객체 반환
             selectedFileName=selectedFIle.getName();
-
+            data.setSelectedFileName(selectedFileName);
             if(selectedFileName==null)
                 resultLabel.setText("파일을 불러오세요");
             else
@@ -63,6 +63,7 @@ public class Controller implements Initializable{
             /*추출된 파일명을 통해 xls or xlsx에 초기화*/
             int pos = selectedFIle.getName().lastIndexOf(".");
             ext = selectedFileName.substring(pos +1);
+            data.setExt(ext);
             if(ext.equals("xls")){
                 xlsList = excelReader.xlsToCustomerVoList(selectedFilePath);
             }

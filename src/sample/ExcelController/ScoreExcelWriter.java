@@ -86,7 +86,6 @@ public class ScoreExcelWriter {
 
         cell = row.createCell(column_index);
         cell.setCellValue("석차");
-        //column_index++;
 
         // 리스트의 size 만큼 row를 생성
         ScoreData vo;
@@ -308,9 +307,9 @@ public class ScoreExcelWriter {
             cell = row.createCell(column_index);
             cell.setCellValue(vo.getAvg());
             column_index++;
+
             cell = row.createCell(column_index);
             cell.setCellValue(vo.getRank());
-            column_index++;
         }
 
             // 입력된 내용 파일로 쓰기
