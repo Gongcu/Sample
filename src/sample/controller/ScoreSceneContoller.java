@@ -78,7 +78,10 @@ public class ScoreSceneContoller implements Initializable {
     private ObservableList<ScoreData> newList = FXCollections.observableArrayList();
     private ObservableList<ScoreData> primaryTableList = FXCollections.observableArrayList(); //for % getUp,DownValue Method
     private int percent;
-    private int mode; //up인지 down인지 구분해서 rank 얻기 위한 변수
+    private int percent_mode; //up인지 down인지 구분해서 rank 얻기 위한 변수
+    private Insert_mode insert_mode; //어느 과목 추출한지 확인 위한 enum 변수
+
+    enum Insert_mode{ALL, MAIN, KEM, MS, E}
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -91,14 +94,19 @@ public class ScoreSceneContoller implements Initializable {
                 tableView.getColumns().clear();
                 //tableView.getColumns().remove(); 선택적 컬럼 제거 가능할듯 반번호이름은 공통되니 냅두고 나머지만 삭제하는 방식으로 만들어보기
                 if (t1.equals("전과목")) {
+                    insert_mode=Insert_mode.ALL;
                     Insert_all();
                 } else if (t1.equals("국영수사과")) {
+                    insert_mode=Insert_mode.MAIN;
                     Insert_main();
                 } else if (t1.equals("국영수")) {
+                    insert_mode=Insert_mode.KEM;
                     Insert_kem();
                 } else if (t1.equals("수학과학")) {
+                    insert_mode=Insert_mode.MS;
                     Insert_ms();
                 } else {
+                    insert_mode=Insert_mode.E;
                     Insert_eng();
                 }
             }
@@ -110,6 +118,8 @@ public class ScoreSceneContoller implements Initializable {
                 excelWriter.xlsxWiter(getTableItem());
             }catch (IndexOutOfBoundsException e){Dialog.getDialog(e);}
         });
+
+
         /*메인화면 getScene*/
         mainButton.setOnMouseClicked(event ->{
             try {
@@ -121,15 +131,15 @@ public class ScoreSceneContoller implements Initializable {
             }catch (IOException e){
                 e.printStackTrace();
             }
-        });
+        }); //main.fxml로 이동하는 메서드
         /*종료*/
         exitButton.setOnMouseClicked(event ->{
             Platform.exit();
         });
         /*percent값 받기*/
+
         getUpButton.setOnMouseClicked(event ->{
             getPercentValue(0,percent, primaryTableList);
-
         });
         getDownButton.setOnMouseClicked(event ->{
             getPercentValue(1,percent, primaryTableList);
@@ -267,8 +277,7 @@ public class ScoreSceneContoller implements Initializable {
         }
     }
 
-
-    //TABLE VALUE GETTER
+    //TABLE VALUE GETTER, ScoreExcelWriter.xlsxWriter에 넘겨줄 list, 열이 있는 컬럼에서만 값을 받고 컬럼 유무가 저장되어 있음 *line:118
     private ObservableList<ScoreData> getTableItem() {
         ScoreData getData = new ScoreData();
         ObservableList<ScoreData> obList = FXCollections.observableArrayList();
@@ -286,50 +295,56 @@ public class ScoreSceneContoller implements Initializable {
             }
             else
                 obList.get(i).setKorHeader(false);
+
             if (tableEng != null) {
                 obList.get(i).setEng(getData.getEng());
                 obList.get(i).setEngHeader(true);
             }
             else
                 obList.get(i).setEngHeader(false);
+
             if (tableMath != null) {
                 obList.get(i).setMath(getData.getMath());
                 obList.get(i).setMathHeader(true);
             }
             else
                 obList.get(i).setMathHeader(false);
+
             if (tableSoc != null) {
                 obList.get(i).setSoc(getData.getSoc());
                 obList.get(i).setSocHeader(true);
             }
             else
                 obList.get(i).setSocHeader(false);
+
             if (tableSci != null) {
                 obList.get(i).setSci(getData.getSci());
                 obList.get(i).setSciHeader(true);
             }
             else
                 obList.get(i).setSciHeader(false);
+
             if (tableMus != null) {
                 obList.get(i).setMus(getData.getMus());
                 obList.get(i).setMusHeader(true);
             }
-            else {
+            else
                 obList.get(i).setMusHeader(false);
-               // System.out.println(obList.get(i).isMusHeader());
-            }
+
             if (tableArt != null) {
                 obList.get(i).setArt(getData.getArt());
                 obList.get(i).setArtHeader(true);
             }
             else
                 obList.get(i).setArtHeader(false);
+
             if (tableSpo != null) {
                 obList.get(i).setSpo(getData.getSpo());
                 obList.get(i).setSpoHeader(true);
             }
             else
                 obList.get(i).setSpoHeader(false);
+
             obList.get(i).setAvg(getData.getAvg());
             obList.get(i).setRank(rank[i]);
         }
@@ -343,7 +358,7 @@ public class ScoreSceneContoller implements Initializable {
         float prevSum=0;
         float nextSum=0;
         int[] rank = new int[tableView.getItems().size()];
-        if(mode==0) {
+        if(percent_mode==0) {
             for (int i = 0; i < tableView.getItems().size(); i++) {
                 rank[i] = 1;
                 for (int j = 0; j < tableView.getItems().size(); j++) {
@@ -389,7 +404,7 @@ public class ScoreSceneContoller implements Initializable {
                 }
             }
         }
-        else if(mode==1) {
+        else if(percent_mode==1) {
             for (int i = 0; i < tableView.getItems().size(); i++) {
                 rank[i] = Integer.parseInt(student_number.getText());
                 for (int j = 0; j < tableView.getItems().size(); j++) {
@@ -533,6 +548,7 @@ public class ScoreSceneContoller implements Initializable {
         tableAvg.setCellValueFactory(cellData -> cellData.getValue().avgProperty().asObject());
         tableRank.setCellValueFactory(cellData -> cellData.getValue().rankProperty().asObject());
     }
+
     private void tableViewSetter(){
         tableView.setItems(newList); // finally add data to tableview
         int[] rank = getRank();

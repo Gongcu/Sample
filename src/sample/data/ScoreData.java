@@ -142,9 +142,7 @@ public class ScoreData implements Comparable<ScoreData>{
         return math.get();
     }
 
-    public FloatProperty mathProperty() {
-        return math;
-    }
+    public FloatProperty mathProperty() {return math; }
 
     public void setMath(float math) {
         this.math.set(math);
